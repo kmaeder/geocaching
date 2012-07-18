@@ -6,6 +6,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.StringTokenizer;
 
 import java.awt.image.BufferedImage;
 import java.net.URL;
@@ -56,9 +57,13 @@ public class XMLParsergpx {
                 desc = delhtml(desc, gccode);
                 String hint = getTagValue("groundspeak:encoded_hints",(Element) cache);
 
+                StringTokenizer tokenizer = new StringTokenizer(name,"/\\?%*:|\"<> ");
+                String filename = path+"output/"+gccode;
+                while (tokenizer.hasMoreTokens()){
+                    filename += "_" +tokenizer.nextToken();
+                }
 
-
-                FileWriter output = new FileWriter(new File(path+"output/"+gccode+".txt"));
+                FileWriter output = new FileWriter(new File(filename+".txt"));
                 output.write("Name: "+name+"\n");
                 output.write("GCCode: "+gccode+"\n");
                 output.write(coords+"\n");
@@ -79,6 +84,7 @@ public class XMLParsergpx {
                 }
                 output.write("-------------\n");
                 output.write("Hint:\n\n\n\n"+hint);
+                output.flush();
                 output.close();
                 
             }
