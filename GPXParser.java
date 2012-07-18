@@ -3,7 +3,7 @@
  * to .txt files with selected information
  * in addition the program downloads the images enclosed the in description
  * Author: kmaeder
- * Mail: kembinski(-at-).de
+ * Mail: kembinski(-at-)gmx.de
  * Version: 0.1, july 2012
  */
 
