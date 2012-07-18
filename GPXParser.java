@@ -21,7 +21,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import javax.imageio.ImageIO;
 
-public class XMLParsergpx {
+public class GPXParser {
 
     //path to the working directory (a subdirectory output is needed)
     private static String path = "/home/kevin/geocaching/";
