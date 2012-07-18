@@ -1,3 +1,12 @@
+/**
+ * program to convert .gpx files downloaded from geocaching.com 
+ * to .txt files with selected information
+ * in addition the program downloads the images enclosed the in description
+ * Author: Kevin Maeder, kmaeder
+ * Mail: kevin.maeder@gmx.de
+ * Version: 0.1, july 2012
+ */
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
@@ -14,7 +23,10 @@ import javax.imageio.ImageIO;
 
 public class XMLParsergpx {
 
+    //path to the working directory (a subdirectory output is needed)
     private static String path = "/home/kevin/geocaching/";
+
+    //load images from webpage or not
     private static boolean images = true;
 
     public static void main(String argv[]) {
@@ -35,14 +47,16 @@ public class XMLParsergpx {
 
         try {
 
-            File fXmlFile = new File(path+argv[0]);
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
+            File gpxFile = new File(path+argv[0]);
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            Document doc = docFactory.newDocumentBuilder().parse(gpxFile);
             doc.getDocumentElement().normalize();
 
+            //for all caches on the gpx file (marked with tag wpt, read in the data
             NodeList nList = doc.getElementsByTagName("wpt");
             for (int temp = 0; temp < nList.getLength(); temp++) {
+
+                //reading data and saving in variables
                 Node cache = nList.item(temp);
                 String coords = "Lat: "+ ((Element) cache).getAttribute("lat")+", Lon: "+ ((Element) cache).getAttribute("lon");
                 String gccode = getTagValue("name",(Element) cache);
@@ -51,18 +65,22 @@ public class XMLParsergpx {
                 String size = getTagValue("groundspeak:container",(Element) cache);
                 String diff = getTagValue("groundspeak:difficulty",(Element) cache)+"/"+ getTagValue("groundspeak:terrain",(Element) cache);
                 String desc = getTagValue("groundspeak:long_description",(Element) cache);
+                //take short_description if a long description is not given
                 if (desc == ""){
                     desc = getTagValue("groundspeak:short_description",(Element) cache);
                 }
                 desc = delhtml(desc, gccode);
                 String hint = getTagValue("groundspeak:encoded_hints",(Element) cache);
 
+                //change the name of the cache such that it is useable as a
+                //filename (not using /,\,?,%,*,:,|,",<,>, 
                 StringTokenizer tokenizer = new StringTokenizer(name,"/\\?%*:|\"<> ");
                 String filename = path+"output/"+gccode;
                 while (tokenizer.hasMoreTokens()){
                     filename += "_" +tokenizer.nextToken();
                 }
 
+                //open output file and write to it
                 FileWriter output = new FileWriter(new File(filename+".txt"));
                 output.write("Name: "+name+"\n");
                 output.write("GCCode: "+gccode+"\n");
@@ -93,6 +111,8 @@ public class XMLParsergpx {
         }
     }
 
+    //function to delete all html from the description and the load the
+    //images from the internet
     private static String delhtml(String input, String gccode){
         String ret = "";
         int numberimg = 0;
@@ -105,6 +125,8 @@ public class XMLParsergpx {
             ret += input.substring(pos,newpos);
             pos = input.indexOf('>',newpos)+1;
             String tag = input.substring(newpos,pos);
+
+            //loading of images from the webpage
             if (tag.length() > 4 && images) {
                 if (tag.substring(1,4).equals("img")){
                     int start = tag.indexOf('"',tag.indexOf("src"))+1;
@@ -118,7 +140,6 @@ public class XMLParsergpx {
                         end = end2;
                     }
 
-                    //System.out.println("Image: "+tag+"indexes: "+start+", "+end);
                     String urlname = tag.substring(start,end);
                     //System.out.println("Image-URL: "+urlname);
                     File f = null;
@@ -128,6 +149,7 @@ public class XMLParsergpx {
                         f = new File(path+"output/"+gccode+"_"+numberimg+".jpg");
                         ImageIO.write(bi,"jpg", f);
                         ret += "(Image: "+gccode+"_"+numberimg+".jpg)";
+                        numberimg++;
                     }
                     catch(Exception e){
                         //e.printStackTrace();
@@ -136,14 +158,14 @@ public class XMLParsergpx {
                         ret += "(Image: not loaded)";
                          
                     }
-                    numberimg++;
                 }
             }
         }
         ret += input.substring(pos);
         return ret;
     }
-
+    //function to get tag value of a specified element
+    //(from : http://www.mkyong.com/java/how-to-read-xml-file-in-java-dom-parser/ )
     private static String getTagValue(String sTag, Element eElement) {
         NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
 
