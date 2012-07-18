@@ -2,8 +2,8 @@
  * program to convert .gpx files downloaded from geocaching.com 
  * to .txt files with selected information
  * in addition the program downloads the images enclosed the in description
- * Author: Kevin Maeder, kmaeder
- * Mail: kevin.maeder@gmx.de
+ * Author: kmaeder
+ * Mail: kembinski(-at-).de
  * Version: 0.1, july 2012
  */
 
